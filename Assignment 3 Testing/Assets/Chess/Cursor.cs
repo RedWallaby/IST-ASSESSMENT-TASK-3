@@ -54,7 +54,9 @@ public class Cursor : MonoBehaviour
         }
         else
         {
-            transform.position = Input.mousePosition;
+            Vector3 vector = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            vector.z = 10;
+            transform.position = vector;
         }
         /*if (!ChessBoard.isRunning && currentOption != null)
         {
