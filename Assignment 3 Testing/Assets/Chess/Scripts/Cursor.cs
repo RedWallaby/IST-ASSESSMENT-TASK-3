@@ -88,7 +88,6 @@ public class Cursor : MonoBehaviour
     {
         Image image = GetComponent<Image>();
         image.sprite = slot.piece.sprite;
-        image.color = slot.piece.isWhite ? Color.white : Color.grey;
         selectedSlot = slot;
     }
 

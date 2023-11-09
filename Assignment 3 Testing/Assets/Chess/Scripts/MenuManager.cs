@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using static ChessBoard;
 
 public class MenuManager : MonoBehaviour
@@ -16,6 +17,11 @@ public class MenuManager : MonoBehaviour
     { 
         Transform obj = null;
         if (index > -1) obj = transform.GetChild(index);
+
+        foreach (Transform transform in transform)
+        {
+            transform.gameObject.SetActive(transform == obj);
+        }
 
         cursor.ResetCursor();
         if (index == -2) //tutorial
@@ -44,17 +50,13 @@ public class MenuManager : MonoBehaviour
             isRunning = false;
             ResetBoard(true);
         }
-
-        foreach (Transform transform in transform)
-        {
-            transform.gameObject.SetActive(transform == obj);
-        }
     }
 
     public void SetGameOver(string str)
     {
         Transform trnsform = transform.GetChild(3);
-        trnsform.GetChild(0).GetComponent<TMP_Text>().text = str + " Wins!";
+        trnsform.GetChild(1).GetComponent<TMP_Text>().text = str + " Wins!";
+        trnsform.GetChild(0).GetComponent<Image>().sprite = extraSprites[str == "White" ? 1 : 2];
     }
 
     public void SetPlaceStyle(TMP_Dropdown dropdown) //change from replacements to free place

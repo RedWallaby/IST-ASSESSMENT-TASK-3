@@ -123,19 +123,12 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
         }
         else if (state == SlotState.moveable) //if the square can be moved to, move to it and swap the turn
         {
-            state = SlotState.moveable;
-            /*if (cursor.selectedSlot != this && (piece == null || cursor.selectedSlot.piece.type != PieceType.necromancer)) //allow for necromancer re-summon*/
-            //{
-            ChessBoard.isWhiteTurn = !ChessBoard.isWhiteTurn;
-            //}
             cursor.MoveBetweenSlots(cursor.selectedSlot, this);
             SwapPieces(cursor.selectedSlot);
             cursor.selectedSlot.UpdateChanges();
         }
         else if (state == SlotState.activatable) //if the square can be 'activated', do so relative to the piece's ability
         {
-            ChessBoard.isWhiteTurn = !ChessBoard.isWhiteTurn;
-
             switch (cursor.selectedSlot.piece.type)
             {
                 case PieceType.cannon:
@@ -152,8 +145,9 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
             }
         }
 
-        if (state != SlotState.normal) //if a move or ability occured, reset for next slot click
+        if (state != SlotState.normal) //if a move or ability occured, reset for next slot click and swap turn
         {
+            ChessBoard.isWhiteTurn = !ChessBoard.isWhiteTurn;
             cursor.selectedSlot = null;
             cursor.ClearPossibleMoves();
         }
@@ -514,13 +508,11 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        print("hi");
         image.color = new Color(image.color.r + colorChange, image.color.g + colorChange, image.color.b + colorChange);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        print("bye :C");
         image.color = new Color(image.color.r - colorChange, image.color.g - colorChange, image.color.b - colorChange);
     }
 }

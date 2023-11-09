@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 //[ExecuteInEditMode]
 public class ChessBoard : MonoBehaviour
@@ -76,35 +76,6 @@ public class ChessBoard : MonoBehaviour
         {
             slot.Setup();
         }
-
-
-        //board.gameObject.SetActive(false);
-        //board = chessBoard;
-        //defaultBoard = defaultBoardP;
-        /*Slot[] slotBoard = board.GetComponentsInChildren<Slot>();
-        foreach (Slot slot in slotBoard)
-        {
-            if (slot.piece == null)
-            {
-                defaultBoardP.Add(null);
-                continue;
-            }
-            defaultBoardP.Add(Instantiate(slot.piece));
-        }
-        for (int i = 0; i < defaultBoardP.Count; i++)
-        {
-            if (i < 20)
-            {
-                defaultBoardP[i].isWhite = false;
-                print(defaultBoardP[i].isWhite);
-            }
-            if (i > 79)
-            {
-                defaultBoardP[i].isWhite = true;
-                print(defaultBoardP[i].isWhite);
-            }
-        }*/
-        //defaultBoard = defaultBoardP;
     }
 
     public static Slot GetSlot(int x, int y) //global, for non-slot actions (same as function is the Slot class)
@@ -116,7 +87,7 @@ public class ChessBoard : MonoBehaviour
     public static void ResetBoard(bool updateSlots) //Set board back to its default
     {
         Slot[] slotBoard = board.GetComponentsInChildren<Slot>();
-        for (int i = 0; i < defaultBoard.Count; i++)
+        for (int i = 0; i < defaultBoard.Count; i++) //loop through all slots and set them to the default board counter-part
         {
             if (defaultBoard[i] == null)
             {
@@ -131,6 +102,20 @@ public class ChessBoard : MonoBehaviour
         }
         blackKingSlot = GetSlot(5, 0);
         whiteKingSlot = GetSlot(5, 9);
+        ResetToggles();
+    }
+
+    public static void ResetToggles() //Gets all color toggle buttons and resets them
+    {
+        ColorChangeButton[] colorChangeButtons = menus.GetComponentsInChildren<ColorChangeButton>(true);
+        foreach (ColorChangeButton colorChange in colorChangeButtons)
+        {
+            Image image = colorChange.GetComponent<Image>();
+            if (image.color != Color.white)
+            {
+                colorChange.SwitchColor(true);
+            }
+        }
     }
 
     public static void SetBoardToTutorial(int index) //Change the board to match the desired tutorial preset
@@ -139,7 +124,7 @@ public class ChessBoard : MonoBehaviour
         List<TutorialManager.ChessSlot> tutorialSlots = tutorialManager.allTutorialSlots[index].tutorialSlots;
         TutorialManager.ChessSlot currentSlot = tutorialSlots[0];
         int slotProgress = 0;
-        for (int i = 0; i < slotBoard.Length; i++)
+        for (int i = 0; i < slotBoard.Length; i++) //loop through all slots and set them to the desired tutorial board counter-part
         {
             if (i == currentSlot.index)
             {

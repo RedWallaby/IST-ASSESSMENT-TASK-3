@@ -34,7 +34,8 @@ public class ReplacementOption : MonoBehaviour, IPointerClickHandler
         }
 
         cursor.currentOption = this;
-        cursorImage.sprite = piece.sprite;
+        cursorImage.sprite = piece.isWhite ? piece.sprite : piece.sprite2;
+        print(piece.isWhite);
         cursorImage.enabled = true;
 
         if (ChessBoard.isReplacements) //manage placeable slots for selected piece
@@ -45,10 +46,6 @@ public class ReplacementOption : MonoBehaviour, IPointerClickHandler
                 slot.GetComponent<Image>().color = Color.cyan;
                 slot.state = SlotState.placeable;
             }
-        }
-        else
-        {
-            cursorImage.color = piece.isWhite ? Color.white : new Color(0.75f, 0.75f, 0.75f);
         }
     }
 
