@@ -14,7 +14,6 @@ public class FallingPiece : MonoBehaviour
 
     public List<Piece> pieces;
 
-    // Start is called before the first frame update
     void Start()
     {
         Restart();
