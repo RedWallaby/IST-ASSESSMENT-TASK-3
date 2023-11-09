@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Queen
   m_EditorClassIdentifier: 
   type: 16
-  sprite: {fileID: 21300000, guid: 9aebd705574f9e642aef1e5f59b3e4d8, type: 3}
+  sprite: {fileID: -1870677004, guid: 2711e55e625c60f48b314d279c819998, type: 3}
+  sprite2: {fileID: 1619401019, guid: 2711e55e625c60f48b314d279c819998, type: 3}
   isWhite: 0
