@@ -81,7 +81,7 @@ public class Cursor : MonoBehaviour
     public void SetSlot(Slot slot) //sets the cursor's reference slot (the slot you currently have selected)
     {
         Image image = GetComponent<Image>();
-        image.sprite = slot.piece.sprite;
+        image.sprite = slot.piece.isWhite ? slot.piece.sprite : slot.piece.sprite2;
         selectedSlot = slot;
     }
 
