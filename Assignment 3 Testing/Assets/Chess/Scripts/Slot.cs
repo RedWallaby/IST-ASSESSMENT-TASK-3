@@ -212,7 +212,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
         if (SlotHasKing(slot))
         {
             ChessBoard.menus.SetMenu(3);
-            ChessBoard.menus.SetGameOver(piece.isWhite ? "Black" : "White");
+            ChessBoard.menus.SetGameOver(slot.piece.isWhite ? "Black" : "White");
             ChessBoard.isRunning = false;
         }
     }
