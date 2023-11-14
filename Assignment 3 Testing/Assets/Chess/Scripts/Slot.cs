@@ -50,7 +50,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
         }
         else
         {
-            pieceImage.sprite = piece.isWhite ? piece.sprite : piece.sprite2;
+            pieceImage.sprite = piece.isWhite ? piece.sprite : piece.sprite1;
         }
         pieceImage.enabled = pieceImage.sprite != null;
     }
@@ -148,6 +148,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
         if (state != SlotState.normal) //if a move or ability occured, reset for next slot click and swap turn
         {
             ChessBoard.isWhiteTurn = !ChessBoard.isWhiteTurn;
+            ChessBoard.ai.isMaximising = ChessBoard.isWhiteTurn;
             cursor.selectedSlot = null;
             cursor.ClearPossibleMoves();
         }
@@ -166,6 +167,15 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
 
     public void PieceExtraAbility(Slot cursorSlot) //complete the results of a piece's ability
     {
+        if (piece.type == PieceType.pawn)
+        {
+            if (y == 0 || y == 9)
+            {
+                bool white = piece.isWhite;
+                piece = Instantiate(ChessBoard.queens[0]);
+                piece.isWhite = white;
+            }
+        }
         if (piece.type == PieceType.piercer)
         {
             if (math.abs(x - cursorSlot.x) < 2) return; //did not move 2 spaces
@@ -383,7 +393,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
         return result;
     }
 
-    private List<Slot> GetActionSquares() //ability movement end locations (red squares)
+    public List<Slot> GetActionSquares() //ability movement end locations (red squares)
     {
         List<Slot> result = new();
         if (piece == null)
@@ -477,8 +487,22 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
     {
         cursor.SetSlot(this);
         cursor.MoveBetweenSlots(this, endSlot);
+        if (endSlot.piece != null)
+        {
+            if (piece.type == PieceType.cannon)
+            {
+                endSlot.piece = null;
+                return;
+            }
+            else if (piece.type == PieceType.necromancer)
+            {
+                endSlot.piece.isWhite = !endSlot.piece.isWhite;
+                return;
+            }
+        }
         endSlot.piece = piece;
         piece = null;
+        
         UpdateChanges();
     }
     

@@ -24,7 +24,7 @@ public class FallingPiece : MonoBehaviour
         direction = 0;
         Piece randomPiece = pieces[Random.Range(0, pieces.Count)];
         bool isWhite = Random.value > 0.5;
-        GetComponent<Image>().sprite = isWhite ? randomPiece.sprite : randomPiece.sprite2;
+        GetComponent<Image>().sprite = isWhite ? randomPiece.sprite : randomPiece.sprite1;
         transform.localPosition = new Vector3(Random.Range(-xWidthR, xWidthR), yWidthR + 100);
         xMove = transform.localPosition.x < 0 ? Random.Range(0f, 1f) : Random.Range(-1f, 0f);
         yMove = Random.Range(-1f, -2f);

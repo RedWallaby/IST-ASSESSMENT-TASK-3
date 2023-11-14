@@ -64,10 +64,17 @@ public class MenuManager : MonoBehaviour
         isReplacements = dropdown.value == 0;
         cursor.ResetCursor();
         cursor.HideCursor();
-        ResetBoard(true);
+        if (isReplacements)
+        {
+            ResetBoard(true);
+        }
+        else
+        {
+            WipeBoard();
+        }
     }
 
-    public void ShowChessBoard()
+        public void ShowChessBoard()
     {
         board.gameObject.SetActive(true);
     }

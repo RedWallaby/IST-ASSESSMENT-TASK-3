@@ -12,7 +12,7 @@ public class ColorChangeButton : MonoBehaviour
         option.ChangePieceColor();
         if (option == option.cursor.currentOption)
         {
-            option.cursor.GetComponent<Image>().sprite = option.piece.isWhite ? option.piece.sprite : option.piece.sprite2;
+            option.cursor.GetComponent<Image>().sprite = option.piece.isWhite ? option.piece.sprite : option.piece.sprite1;
         }
     }
 }

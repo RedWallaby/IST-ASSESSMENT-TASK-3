@@ -5,7 +5,7 @@ public class Piece : ScriptableObject
 {
     public PieceType type;
     public Sprite sprite;
-    public Sprite sprite2;
+    public Sprite sprite1;
     public bool isWhite;
 }
 
