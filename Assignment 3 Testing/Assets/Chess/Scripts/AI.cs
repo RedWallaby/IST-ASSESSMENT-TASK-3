@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting.FullSerializer;
 using UnityEditor;
@@ -43,6 +44,8 @@ public class AI : MonoBehaviour
     [ReadOnly] public List<Move> blackBackLog;
 
     private int randomMovesCurrently;
+
+    public TMP_Text moveDelay;
 
 
     private List<Slot> resetColor = new();
@@ -160,6 +163,7 @@ public class AI : MonoBehaviour
                 activateCommand = true;
                 action = Action.Minimax;
             }
+            UpdateMoveDelay();
         }
         else
         {
@@ -239,7 +243,7 @@ public class AI : MonoBehaviour
                     {
                         randomMoves++;
                         randomMovesCurrently++;
-                        if (Random.Range(0, 1) > 0.5) //picks a random move if they have equal value
+                        if (Random.Range(0, 2) > 0.5) //picks a random move if they have equal value
                         {
                             continue; 
                         }
@@ -492,6 +496,78 @@ public class AI : MonoBehaviour
         { 2.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 2.0f, 2.0f },
         { 2.0f, 3.0f, 1.0f, 0.5f, 0.0f, 0.0f, 0.5f, 1.0f, 3.0f, 2.0f },
     };
+
+    public void HandleDropDown(TMP_Dropdown dropdown)
+    {
+        int index = dropdown.value;
+        if (index == 0)
+        {
+            playingSides = Sides.White;
+        }
+        else if (index == 1)
+        {
+            playingSides = Sides.Black;
+        }
+        else
+        {
+            playingSides = Sides.White | Sides.Black;
+        }
+    }
+    public void HandleDepth(TMP_InputField inputField)
+    {
+        if (!int.TryParse(inputField.text, out int value))
+        {
+            inputField.text = "0";
+        }
+        else
+        {
+            depth = value;
+        }
+    }
+    public void HandleMoveNumber(TMP_InputField inputField)
+    {
+        if (!int.TryParse(inputField.text, out int value))
+        {
+            inputField.text = "0";
+        }
+        else
+        {
+            runMoves = value;
+        }
+    }
+    public void HandleMoveDelay(TMP_InputField inputField)
+    {
+        if (!float.TryParse(inputField.text, out float value))
+        {
+            inputField.text = "0";
+        }
+        else
+        {
+            autoMoveDelay = value;
+            UpdateMoveDelay();
+        }
+    }
+
+    public void HandleAutoComplete(Toggle toggle)
+    {
+        autoCompleteMove = toggle.isOn;
+    }
+    public void HandleShowMove(Toggle toggle)
+    {
+        showMove = toggle.isOn;
+    }
+    public void HandleIsMaximising(Toggle toggle)
+    {
+        isMaximising = toggle.isOn;
+    }
+    public void HandleAutoPlaying(Toggle toggle)
+    {
+        autoRunning = toggle.isOn;
+    }
+    public void UpdateMoveDelay()
+    {
+        moveDelay.text = "Next Move: \n" + (autoMoveDelay - autoMoveTimer).ToString();
+    }
 }
 
 [Serializable]

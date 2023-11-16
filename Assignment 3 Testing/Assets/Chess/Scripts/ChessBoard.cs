@@ -286,8 +286,7 @@ public class ChessBoard : MonoBehaviour
         List<AI.Move> result = new();
         foreach (AISlot slot in currentGame)
         {
-            if (slot.piece == null) continue;
-            if (slot.piece.isWhite != isMaximising) continue;
+            if (slot.piece == null || slot.piece.isWhite != isMaximising) continue;
             List<AISlot> currentSlots = slot.GetValidSquares();
             currentSlots.AddRange(slot.GetActionSquares());
             foreach (AISlot slot1 in currentSlots)
