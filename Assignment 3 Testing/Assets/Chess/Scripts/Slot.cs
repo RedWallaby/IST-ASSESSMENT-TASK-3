@@ -485,7 +485,12 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
 
     public void MovePieceToSlot(Slot endSlot) //code-run moving between slots, instantly chooses a start and end location
     {
-        cursor.SetSlot(this);
+        if (piece == null)
+        {
+            print("You can't move a null piece dipshit"); 
+            return;
+        }
+            cursor.SetSlot(this);
         cursor.MoveBetweenSlots(this, endSlot);
         if (endSlot.piece != null)
         {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using Unity.Mathematics;
 using Unity.VisualScripting.FullSerializer;
@@ -14,6 +15,8 @@ public class AI : MonoBehaviour
 {
     [Header("Main")]
     public Sides playingSides;
+    public Difficulty difficulty;
+    public float difficultyPercentage;
 
     [Header("Tweakables")]
     public int depth;
@@ -45,6 +48,7 @@ public class AI : MonoBehaviour
 
     private int randomMovesCurrently;
 
+
     public TMP_Text moveDelay;
 
 
@@ -63,6 +67,23 @@ public class AI : MonoBehaviour
         None,
         White,
         Black
+    }
+
+    public enum Difficulty //dont really need
+    {
+        Max, //100%
+        High, //85%
+        Average, //70%
+        Low, //50%
+        veryLow, //25%
+        Min, //0%
+    }
+
+    [Serializable]
+    public struct Move
+    {
+        public AISlot start;
+        public AISlot end;
     }
 
     private void Update()
@@ -185,13 +206,6 @@ public class AI : MonoBehaviour
         resetColor.Clear();
     }
 
-    [Serializable]
-    public struct Move
-    {
-        public AISlot start;
-        public AISlot end;
-    }
-
     public bool InBackLog(List<Move> moves, Move move) //needs improving cause like bruh
     {
         foreach(Move listMove in moves)
@@ -217,6 +231,7 @@ public class AI : MonoBehaviour
 
     public Move MinimaxRoot(int depth, bool isMaximisingPlayer)
     {
+        Dictionary<float, Move> valueMoves = new();
         randomMovesCurrently = 0;
         if (isMaximisingPlayer)
         {
@@ -237,7 +252,7 @@ public class AI : MonoBehaviour
                     continue; //prevent repeated moves
                 }
 
-                if (value >= bestMove)
+                /*if (value >= bestMove)
                 {
                     if (value == bestMove)
                     {
@@ -252,10 +267,23 @@ public class AI : MonoBehaviour
                     randomMovesCurrently = 0;
                     bestMove = value;
                     bestMoveToPlay = move;
-                }
+                }*/
+                valueMoves.TryAdd(value, move);
             }
+
             evaluation = bestMove;
-            return bestMoveToPlay;
+
+            float[] values = valueMoves.Keys.ToArray();
+            //Array.Sort(values); Array.Reverse(values); //could be optimised(?) without this
+
+            evaluation = values.Max();
+
+            float searchValue = math.lerp(values.Min(), evaluation, difficultyPercentage); //ADD FOR NOT IS MAXIMISING
+            print(searchValue);
+            print(values.Min());
+            print(values.Max());
+            return valueMoves[values.OrderBy(x => Math.Abs(x - searchValue)).First()];
+
         }
         else
         {
