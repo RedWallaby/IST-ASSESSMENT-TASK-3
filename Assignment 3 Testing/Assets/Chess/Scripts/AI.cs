@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using Unity.VisualScripting.FullSerializer;
 using UnityEditor;
 using UnityEngine;
@@ -58,7 +59,8 @@ public class AI : MonoBehaviour
     {
         None,
         Minimax,
-        Eval
+        Eval,
+        Test
     }
 
     [Flags]
@@ -166,14 +168,18 @@ public class AI : MonoBehaviour
                     isWhiteTurn = !isWhiteTurn;
                     isMaximising = !isMaximising;
                 }
-                immediateEvaluation = EvaluateBoard(currentGame);
+                immediateEvaluation = EvaluateBoard();
                 positionalAdvantage = evaluation - immediateEvaluation;
             }
             else if (action == Action.Eval)
             {
-                print(EvaluateBoard(currentGame));
+                print(EvaluateBoard());
             }
-        }
+			else if (action == Action.Test)
+			{
+                TestSpeeds();
+			}
+		}
         if (((playingSides.HasFlag(Sides.White) && isWhiteTurn) || (playingSides.HasFlag(Sides.Black) && !isWhiteTurn)) && autoRunning && runMoves != 0 && isRunning == true)
         {
             autoMoveTimer += Time.deltaTime;
@@ -196,6 +202,42 @@ public class AI : MonoBehaviour
             runMoves = -1;
         }
     }
+
+    public void TestSpeeds()
+    {
+		DateTime before = DateTime.Now;
+		for (int i = 0; i < 100000; i++) //~1275 milliseconds
+        {
+			GetAllMoves(true);
+        }
+		TimeSpan span = DateTime.Now.Subtract(before);
+        print("GetAllMoves: " + span.TotalMilliseconds);
+
+		before = DateTime.Now;
+		for (int i = 0; i < 100000; i++) //~64 milliseconds
+		{
+			EvaluateBoard();
+		}
+		span = DateTime.Now.Subtract(before);
+		print("EvalBoard: " + span.TotalMilliseconds);
+
+		AISlot slot = new()
+		{
+			x = 4,
+			y = 4,
+			piece = new()
+            {
+                //type = PieceType.queen
+            },
+		};
+		before = DateTime.Now;
+		for (int i = 0; i < 100000; i++) //
+		{
+            slot.GetValidSquares();
+		}
+		span = DateTime.Now.Subtract(before);
+		print("ValidSquares: " + span.TotalMilliseconds);
+	}
 
     public void ResetColors()
     {
@@ -331,7 +373,7 @@ public class AI : MonoBehaviour
     {
         if (depth == 0)
         {
-            return EvaluateBoard(currentGame);
+            return EvaluateBoard();
         }
 
         List<Move> moves = GetAllMoves(isMaximisingPlayer);
@@ -386,10 +428,10 @@ public class AI : MonoBehaviour
         }
     }
 
-    public float EvaluateBoard(AISlot[] game)
+    public float EvaluateBoard()
     {
         float totalEval = 0;
-        foreach (AISlot slot in game)
+        foreach (AISlot slot in currentGame)
         {
             totalEval += GetPieceValue(slot);
         }

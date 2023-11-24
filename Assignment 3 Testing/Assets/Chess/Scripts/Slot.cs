@@ -238,6 +238,12 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
         {
             image.color = x % 2 == 0 ? light : dark;
         }
+
+        //if its hovered add hover colour
+        if (isHovered) 
+        {
+            AddColourChange();
+        }
     }
 
     public Slot GetSlot(int x, int y) //gets a slot from 2 coordinates
@@ -533,17 +539,25 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
     }
 
     //tile hover code
-    readonly float colorChange = -0.1f;
+    readonly float colorChange = 0.1f;
+    private bool isHovered = false;
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        image.color = new Color(image.color.r + colorChange, image.color.g + colorChange, image.color.b + colorChange);
+        isHovered = true;
+        AddColourChange();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        image.color = new Color(image.color.r - colorChange, image.color.g - colorChange, image.color.b - colorChange);
+        isHovered = false;
+        image.color = new Color(image.color.r + colorChange, image.color.g + colorChange, image.color.b + colorChange);
     }
+
+    private void AddColourChange()
+    {
+		image.color = new Color(image.color.r - colorChange, image.color.g - colorChange, image.color.b - colorChange);
+	}
 }
 public enum SlotState
 {

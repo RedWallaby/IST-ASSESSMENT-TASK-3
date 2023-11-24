@@ -39162,6 +39162,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playingSides: 2
+  difficulty: 0
+  difficultyPercentage: 1
   depth: 4
   autoCompleteMove: 1
   showMove: 1
@@ -45317,6 +45319,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playingSides: -1
+  difficulty: 0
+  difficultyPercentage: 0
   depth: 4
   autoCompleteMove: 1
   showMove: 1
