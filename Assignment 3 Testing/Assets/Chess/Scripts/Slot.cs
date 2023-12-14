@@ -58,6 +58,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
     public void OnPointerClick(PointerEventData eventData) //Manages everything to do with clicking slots
     {
         if (ChessBoard.moveInProgress || !TutorialSlot()) return;
+        
         if (!ChessBoard.isRunning)
         {
             if (cursor.currentOption == null && !ChessBoard.isReplacements)
@@ -95,11 +96,23 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
             UpdateChanges();
             return;
         }
-        if (cursor.selectedSlot == this)
+        if (cursor.isIsolated)
+        {
+            if (cursor.isolatedSlots.Contains(this))
+            {
+                cursor.isIsolated = false;
+                cursor.isolatedSlots.Clear();
+            }
+            else
+            {
+                return;
+            }
+		}
+		if (cursor.selectedSlot == this)
         {
             PutPieceBackDown();
         }
-        else if ((cursor.selectedSlot == null || cursor.selectedSlot != this) && piece != null && piece.isWhite == ChessBoard.isWhiteTurn)
+		else if ((cursor.selectedSlot == null || cursor.selectedSlot != this) && piece != null && piece.isWhite == ChessBoard.isWhiteTurn)
         {
             //only have one selected slot
             PutPieceBackDown();
@@ -165,53 +178,6 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
         cursor.ClearPossibleMoves();
     }
 
-    public void PieceExtraAbility(Slot cursorSlot) //complete the results of a piece's ability
-    {
-        if (piece.type == PieceType.pawn)
-        {
-            if (y == 0 || y == 9)
-            {
-                bool white = piece.isWhite;
-                piece = Instantiate(ChessBoard.queens[0]);
-                piece.isWhite = white;
-            }
-        }
-        if (piece.type == PieceType.piercer)
-        {
-            if (math.abs(x - cursorSlot.x) < 2) return; //did not move 2 spaces
-            Slot slot = GetSlot((x + cursorSlot.x) / 2, (y + cursorSlot.y) / 2); //average slot (slot in middle of target and start)
-            if (CanTake(slot))
-            {
-                TakenSlotKingCheck(slot);
-                slot.GenerateDeathParticles(slot.piece);
-                slot.piece = null;
-            }
-            slot.ResetBaseColour();
-            slot.UpdateChanges();
-        }
-        else if (piece.type == PieceType.juggernaut)
-        {
-            List<Slot> tempResult = new()
-            {
-                GetSlot(x - 1, y), //left
-                GetSlot(x, y - 1), //up
-                GetSlot(x + 1, y), //right
-                GetSlot(x, y + 1) //down
-            };
-            foreach (Slot slot in tempResult)
-            {
-                if (CanTake(slot))
-                {
-                    TakenSlotKingCheck(slot);
-                    slot.GenerateDeathParticles(slot.piece);
-                    slot.piece = null;
-                    slot.ResetBaseColour();
-                    slot.UpdateChanges();
-                }
-            }
-        }
-    }
-
     public bool SlotHasKing(Slot slot) //check for necromancer or king
     {
         return slot.piece != null && (slot.piece.type == PieceType.king || slot.piece.type == PieceType.necromancer);
@@ -252,12 +218,94 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
         return transform.parent.GetChild(x + 10 * y).GetComponent<Slot>();
     }
 
-    public bool CanTake(Slot slot) //helper function (checks if a slot could be taken by the piece on this slot)
+    public bool CanMoveTo(Slot slot) //helper function (checks if a slot could be taken by the piece on this slot)
     {
         return slot != null && (slot.piece == null || piece.isWhite != slot.piece.isWhite);
     }
 
-    public List<Slot> GetValidSquares() //all piece movement end locations, put into a list
+	public bool CanTake(Slot slot) //helper function (checks if there is a takeable piece on the given slot)
+	{
+		return slot != null && slot.piece != null && piece.isWhite != slot.piece.isWhite;
+	}
+
+	public bool IsEmpty(Slot slot) //helper function (checks if the slot has no piece)
+	{
+		return slot != null && slot.piece == null;
+	}
+
+	public void PieceExtraAbility(Slot cursorSlot) //complete the results of a piece's ability
+	{
+		if (piece.type == PieceType.pawn)
+		{
+			if (y == 0 || y == 9)
+			{
+				bool white = piece.isWhite;
+				piece = Instantiate(ChessBoard.queens[0]);
+				piece.isWhite = white;
+			}
+		}
+		if (piece.type == PieceType.piercer || piece.type == PieceType.checker)
+		{
+			if (math.abs(x - cursorSlot.x) < 2) return; //did not move 2 spaces
+			Slot slot = GetSlot((x + cursorSlot.x) / 2, (y + cursorSlot.y) / 2); //average slot (slot in middle of target and start)
+			if (CanMoveTo(slot))
+			{
+				TakenSlotKingCheck(slot);
+				slot.GenerateDeathParticles(slot.piece);
+				slot.piece = null;
+			}
+			slot.ResetBaseColour();
+			slot.UpdateChanges();
+            if (piece.type == PieceType.checker || piece.type == PieceType.checkerKing) //try to add chain taking
+            {
+                foreach (Slot slot1 in GetValidSquares())
+                {
+                    if (math.abs(slot1.x - x) > 1) //distance is greater than 1
+                    {
+						slot1.image.color = Color.green;
+						slot1.state = SlotState.moveable;
+                        cursor.validSlots.Add(slot1);
+                        cursor.selectedSlot = this;
+
+						ChessBoard.isWhiteTurn = cursor.selectedSlot.piece.isWhite;
+
+                        //isolate moveable slots
+                        cursor.isIsolated = true; 
+                        cursor.isolatedSlots.Add(slot1);
+						return;
+                    }
+                }
+                if (piece.type == PieceType.checker && ((piece.isWhite && y == 0) || (!piece.isWhite && y == 9)))
+                {
+                    piece.type = PieceType.checkerKing;
+                    UpdateChanges();
+			    }
+			}
+		}
+		else if (piece.type == PieceType.juggernaut)
+		{
+			List<Slot> tempResult = new()
+			{
+				GetSlot(x - 1, y), //left
+                GetSlot(x, y - 1), //up
+                GetSlot(x + 1, y), //right
+                GetSlot(x, y + 1) //down
+            };
+			foreach (Slot slot in tempResult)
+			{
+				if (CanMoveTo(slot))
+				{
+					TakenSlotKingCheck(slot);
+					slot.GenerateDeathParticles(slot.piece);
+					slot.piece = null;
+					slot.ResetBaseColour();
+					slot.UpdateChanges();
+				}
+			}
+		}
+	}
+
+	public List<Slot> GetValidSquares() //all piece movement end locations, put into a list
     {
         List<Slot> result = new();
         if (piece == null)
@@ -301,7 +349,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
             };
             foreach (Slot slot in tempResult)
             {
-                if (CanTake(slot))
+                if (CanMoveTo(slot))
                 {
                     result.Add(slot);
                 }
@@ -331,7 +379,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
                 for (int yC = -1; yC < 2; yC++)
                 {
                     Slot slot = GetSlot(x + xC, y + yC);
-                    if (CanTake(slot))
+                    if (CanMoveTo(slot))
                     {
                         result.Add(slot);
                     }
@@ -364,11 +412,11 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
                 {
                     Slot firstSlot = GetSlot(x + xC, y + yC);
                     Slot secondSlot = GetSlot(x + xC * 2, y + yC * 2);
-                    if (CanTake(secondSlot))
+                    if (CanMoveTo(secondSlot))
                     {
                         result.Add(secondSlot);
                     }
-                    if (CanTake(firstSlot))
+                    if (CanMoveTo(firstSlot))
                     {
                         result.Add(firstSlot);
                     }
@@ -390,13 +438,48 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
             };
             foreach (Slot slot in tempResult)
             {
-                if (CanTake(slot))
+                if (CanMoveTo(slot))
                 {
                     result.Add(slot);
                 }
             }
         }
-        return result;
+        else if (piece.type == PieceType.checker)
+        {
+			for (int xC = -1; xC < 2; xC += 2)
+			{
+				Slot firstSlot = GetSlot(x + xC, y + (piece.isWhite ? -1 : 1));
+				Slot secondSlot = GetSlot(x + xC * 2, y + (2 * (piece.isWhite ? -1 : 1)));
+				if (IsEmpty(secondSlot) && CanTake(firstSlot))
+				{
+					result.Add(secondSlot);
+				}
+				else if (IsEmpty(firstSlot))
+				{
+					result.Add(firstSlot);
+				}
+			}
+		}
+		else if (piece.type == PieceType.checkerKing)
+		{
+			for (int xC = -1; xC < 2; xC += 2)
+			{
+                for (int yC = -1; yC < 2; yC += 2)
+                {
+                    Slot firstSlot = GetSlot(x + xC, y + yC);
+                    Slot secondSlot = GetSlot(x + xC * 2, y + yC);
+                    if (IsEmpty(secondSlot) && CanTake(firstSlot))
+                    {
+                        result.Add(secondSlot);
+                    }
+                    else if (IsEmpty(firstSlot))
+                    {
+                        result.Add(firstSlot);
+                    }
+                }
+			}
+		}
+		return result;
     }
 
     public List<Slot> GetActionSquares() //ability movement end locations (red squares)
@@ -424,7 +507,7 @@ public class Slot : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, I
             };
             foreach (Slot slot in tempResult)
             {
-                if (CanTake(slot) && slot.piece != null)
+                if (CanMoveTo(slot) && slot.piece != null)
                 {
                     result.Add(slot);
                 }

@@ -19,6 +19,9 @@ public class Cursor : MonoBehaviour
 
     public List<ParticleSystem> particleSystems = new();
 
+    public bool isIsolated;
+    public List<Slot> isolatedSlots = new();
+
     // Update is called once per frame
     void Update()
     {

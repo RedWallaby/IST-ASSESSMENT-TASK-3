@@ -23,6 +23,8 @@ public class ChessBoard : MonoBehaviour
     public static bool isWhiteTurn = true;
     public static bool moveInProgress;
 
+    public bool testIsWhiteTurn;
+
     public static Slot whiteKingSlot;
     public static Slot blackKingSlot;
     public static PieceType whiteQueenEQ;
@@ -36,6 +38,9 @@ public class ChessBoard : MonoBehaviour
 
     public static List<Piece> queens;
     public List<Piece> queensP;
+
+    public static List<Piece> allPieces;
+    public List<Piece> allPiecesP;
 
     //tutorial code
     public static List<SlotsWrapper> allTutorialSlots;
@@ -63,7 +68,12 @@ public class ChessBoard : MonoBehaviour
         public List<ChessSlot> tutorialSlots;
     }
 
-    private void Awake()
+	public void Update()
+	{
+        testIsWhiteTurn = isWhiteTurn;
+	}
+
+	private void Awake()
     {
         current = this;
         board = chessBoard;
